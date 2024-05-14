@@ -96,7 +96,7 @@ const deleteUser = (req, res) => {
     message: "Id deleted successfully...",
   });
 };
-// ///
+// //
 // Creating Router
 router.route("/").get(getAllUsers).post(createUser);
 router.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
