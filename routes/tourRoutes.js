@@ -100,7 +100,7 @@ const deleteTour = (req, res) => {
     message: "Id deleted successfully...",
   });
 };
-// \\\
+// \\
 // Creating Router
 router.route("/").get(getAllTours).post(createTour);
 router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
