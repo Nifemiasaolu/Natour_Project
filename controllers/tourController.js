@@ -1,7 +1,7 @@
 const fs = require("fs");
 
 const allTours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 );
 
 // Param Middleware
@@ -18,14 +18,14 @@ exports.checkID = (req, res, next, val) => {
 };
 
 exports.checkBody = (req, res, next) => {
-    if(!req.body.name || !req.body.price){
-        return res.status(400).json({
-            status: "Failed",
-            message: "Missing Name or Price"
-        })
-    }
-    next();
-}
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: "Failed",
+      message: "Missing Name or Price",
+    });
+  }
+  next();
+};
 
 // ROUTE HANDLERS
 exports.getAllTours = (req, res) => {
@@ -56,6 +56,7 @@ exports.getTour = (req, res) => {
 
 exports.createTour = (req, res) => {
   const newId = allTours[allTours.length - 1].id + 1;
+  // eslint-disable-next-line prefer-object-spread
   const newTour = Object.assign({ id: newId }, req.body);
 
   allTours.push(newTour);
@@ -70,7 +71,7 @@ exports.createTour = (req, res) => {
           tour: newTour,
         },
       });
-    }
+    },
   );
 };
 
