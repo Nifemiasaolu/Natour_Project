@@ -1,19 +1,21 @@
 const fs = require("fs");
 const express = require("express");
 const morgan = require("morgan");
-
 const app = express();
 
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 
-// 1) MIDDLEWARE
+// MIDDLEWARE FOR ALL OF THE ROUTES
 
 // 3rd Party Middleware
 app.use(morgan("dev"));
 
 // Middlewawre for body-parser
 app.use(express.json());
+
+// Serving static files
+app.use(express.static(`${__dirname}/public`)) // Uses it to access static file in our system. Access http://localhost/overview.html on browser
 
 //  Our Own MiddleWare
 app.use((req, res, next) => {
@@ -35,12 +37,11 @@ app.use((req, res, next) => {
 // app.delete("/api/v1/tours/:id", deleteTour);
 ///////////////////////////////////////////
 
-// 3) ROUTES
+// MIDDLEWARE FOR TOUR AND USER ROUTES
 // Mounting Routers
+// Using the route as middleware.
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
-// 4) START SERVER
-const port = 3000;
-app.listen(port, () => {
-  console.log(`App listening on port ${port}...`);
-});
+
+// START SERVER
+module.exports = app;
