@@ -1,6 +1,6 @@
-const fs = require("fs");
 const express = require("express");
 const morgan = require("morgan");
+
 const app = express();
 
 const tourRouter = require("./routes/tourRoutes");
@@ -9,13 +9,15 @@ const userRouter = require("./routes/userRoutes");
 // MIDDLEWARE FOR ALL OF THE ROUTES
 
 // 3rd Party Middleware
-app.use(morgan("dev"));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 // Middlewawre for body-parser
 app.use(express.json());
 
 // Serving static files
-app.use(express.static(`${__dirname}/public`)) // Uses it to access static file in our system. Access http://localhost/overview.html on browser
+app.use(express.static(`${__dirname}/public`)); // Uses it to access static file in our system. Access http://localhost/overview.html on browser
 
 //  Our Own MiddleWare
 app.use((req, res, next) => {
