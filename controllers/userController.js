@@ -22,7 +22,6 @@ exports.getAllUsers = (req, res) => {
 
 exports.createUser = (req, res) => {
   const newId = allUsers[allUsers.length - 1]._id + 1;
-  // eslint-disable-next-line prefer-object-spread
   const newUser = Object.assign({ id: newId }, req.body);
 
   allUsers.push(newUser);
@@ -95,3 +94,5 @@ exports.deleteUser = (req, res) => {
     message: "Id deleted successfully...",
   });
 };
+
+// ///
