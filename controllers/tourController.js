@@ -92,4 +92,4 @@ exports.deleteTour = (req, res) => {
     message: "Id deleted successfully...",
   });
 };
-// //\
+// //
