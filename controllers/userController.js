@@ -22,14 +22,16 @@ exports.getAllUsers = (req, res) => {
 
 exports.createUser = (req, res) => {
   const newId = allUsers[allUsers.length - 1]._id + 1;
-  const newUser = Object.assign({ id: newId }, req.body);
+  // const newUser = Object.assign({ id: newId }, req.body);
+  // eslint-disable-next-line node/no-unsupported-features/es-syntax
+  const newUser = { id: newId, ...req.body };
 
   allUsers.push(newUser);
 
   fs.writeFile(
     `${__dirname}/dev-data/data/users.json`,
     JSON.stringify(allUsers),
-    (err) => {
+    () => {
       res.status(201).json({
         status: "success",
         data: {
