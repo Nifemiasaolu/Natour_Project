@@ -1,95 +1,155 @@
-const fs = require("fs");
-
-const allTours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
-);
-
-// Param Middleware
-exports.checkID = (req, res, next, val) => {
-  console.log(`Tour id is: ${val}`);
-
-  if (req.params.id * 1 > allTours.length) {
-    return res.status(404).json({
-      status: "Failed",
-      message: "Invalid ID",
-    });
-  }
-  next();
-};
-
-exports.checkBody = (req, res, next) => {
-  if (!req.body.name || !req.body.price) {
-    return res.status(400).json({
-      status: "Failed",
-      message: "Missing Name or Price",
-    });
-  }
-  next();
-};
+const Tour = require("../models/tourModel");
 
 // ROUTE HANDLERS
-exports.getAllTours = (req, res) => {
-  res.status(200).json({
-    status: "success",
-    requestedAt: req.requestTime,
-    results: allTours.length,
-    data: {
-      tours: allTours,
-    },
-  });
+exports.getAllTours = async (req, res) => {
+  try {
+    // BUILD QUERY
+    // 1) Filter Query
+    const queryObj = { ...req.query };
+    const filteredObj = ["page", "sort", "limit", "fields"];
+    filteredObj.forEach((el) => delete queryObj[el]);
+
+    // 2) Advanced Filter (Bringing the gte, gt, lte & lt method into consideration)
+    let queryString = JSON.stringify(queryObj);
+    queryString = queryString.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (match) => `$${match}`,
+    );
+
+    const queryStr = JSON.parse(queryString);
+    console.log(queryStr);
+
+    const query = Tour.find(queryStr); // First Method of writing a/filter query
+
+    // EXECUTE QUERY
+    const tours = await query;
+
+    // Querying Using Special Mongoose Methods
+    // const query = await Tour.find() //Find method returns a query, that's why we can chain these methods to it.
+    //   .where("duration")
+    //   .equals(5)
+    //   .where("difficulty")
+    //   .equals("easy");
+
+    // SEND RESPONSE
+    res.status(200).json({
+      status: "success",
+      results: tours.length,
+      data: {
+        tours: tours,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "Failed",
+      message: error,
+    });
+  }
 };
 
-exports.getTour = (req, res) => {
+exports.getTour = async (req, res) => {
+  try {
+    const tour = await Tour.findById(req.params.id);
+    // Tour.findOne({_id: req.params.id}) // Shorthand of the above method
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        tour,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "Failed",
+      message: error,
+    });
+  }
+};
+
+exports.createTour = async (req, res) => {
+  try {
+    // const newTour = new Tour(req.body) //Another method to use to create.
+    // newTour.save(); // Follows the convention of model.prototype.save(); "prototype" => "new Tour"
+
+    const newTour = await Tour.create(req.body);
+
+    res.status(201).json({
+      status: "success",
+      data: {
+        tour: newTour,
+      },
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "Failed",
+      message: "Invalid Data Sent",
+    });
+
+    console.log("Error:", error);
+  }
+};
+
+exports.updateTour = async (req, res) => {
+  try {
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: { tour },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "Failed",
+      message: error,
+    });
+  }
+};
+
+exports.deleteTour = async (req, res) => {
   console.log(req.params);
+  try {
+    await Tour.findByIdAndDelete(req.params.id);
 
-  const id = req.params.id * 1; // When we multiply a string the looks like a number (e.g "5"), with a number, JavaScript automatically converts the string to a number.
-  // E.g "5" * 1 = 5
-  const tour = allTours.find((el) => el.id === id);
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      tour,
-    },
-  });
+    res.status(204).json({
+      status: "success",
+      message: "Id deleted successfully...",
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "Failed",
+      message: error,
+    });
+  }
 };
 
-exports.createTour = (req, res) => {
-  const newId = allTours[allTours.length - 1].id + 1;
-  // eslint-disable-next-line prefer-object-spread
-  const newTour = Object.assign({ id: newId }, req.body);
+// ////////////////////
 
-  allTours.push(newTour);
+// const allTours = JSON.parse(
+//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
+// );
 
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(allTours),
-    () => {
-      res.status(201).json({
-        status: "success",
-        data: {
-          tour: newTour,
-        },
-      });
-    },
-  );
-};
+// Param Middleware
+// exports.checkID = (req, res, next, val) => {
+//   console.log(`Tour id is: ${val}`);
 
-exports.updateTour = (req, res) => {
-  console.log(req.params);
+//   if (req.params.id * 1 > allTours.length) {
+//     return res.status(404).json({
+//       status: "Failed",
+//       message: "Invalid ID",
+//     });
+//   }
+//   next();
+// };
 
-  res.status(200).json({
-    status: "success",
-    data: "<Tour Updated...>",
-  });
-};
-
-exports.deleteTour = (req, res) => {
-  console.log(req.params);
-
-  res.status(204).json({
-    status: "success",
-    message: "Id deleted successfully...",
-  });
-};
-// /
+// exports.checkBody = (req, res, next) => {
+//   if (!req.body.name || !req.body.price) {
+//     return res.status(400).json({
+//       status: "Failed",
+//       message: "Missing Name or Price",
+//     });
+//   }
+//   next();
+// };
