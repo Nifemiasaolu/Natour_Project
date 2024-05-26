@@ -191,7 +191,7 @@ exports.deleteTour = async (req, res) => {
   }
 };
 
-// ///////////////////
+// //////////////////
 
 // const allTours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
