@@ -1,4 +1,5 @@
 const Tour = require("../models/tourModel");
+const APIFeatures = require("../utils/apiFeatures");
 
 // SORT OUT THE TOP 5 TOURS
 exports.aliasTopTours = async (req, res, next) => {
@@ -8,94 +9,17 @@ exports.aliasTopTours = async (req, res, next) => {
   next();
 };
 
-class APIFeatures {
-  // query gotten from Mongo(Tour.find), queryString from Express(req.query)
-  constructor(query, queryString) {
-    this.query = query;
-    this.queryString = queryString;
-  }
-
-  filter() {
-    // FIltering works with the find method.
-    const queryObj = { ...this.queryString };
-    const excludedFields = ["page", "sort", "limit", "fields"];
-    excludedFields.forEach((el) => delete queryObj[el]);
-
-    // 1B) ADVANCED FILTERING (Bringing the gte, gt, lte & lt method into consideration)
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-    const stringifiedQuery = JSON.parse(queryStr);
-
-    this.query = this.query(stringifiedQuery); // First Method of writing a/filter query
-  }
-}
-
 // ROUTE HANDLERS
 exports.getAllTours = async (req, res) => {
   try {
-    // BUILD QUERY
-
-    // 1A) FILTERING Query
-    // FIltering works with the find method.
-    // const queryObj = { ...req.query };
-    // const excludedFields = ["page", "sort", "limit", "fields"];
-    // excludedFields.forEach((el) => delete queryObj[el]);
-
-    // // 1B) ADVANCED FILTERING (Bringing the gte, gt, lte & lt method into consideration)
-    // let queryString = JSON.stringify(queryObj);
-    // queryString = queryString.replace(
-    //   /\b(gte|gt|lte|lt)\b/g,
-    //   (match) => `$${match}`,
-    // );
-
-    // const queryStr = JSON.parse(queryString);
-
-    // let query = Tour.find(queryStr); // First Method of writing a/filter query
-
-    // 2) SORTING
-    // Sorting works with the sort method.
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(",").join(" ");
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort("-createdAt");
-    }
-
-    // 3) FIELD LIMITING
-    // Limiting field (display certain data) works with the select method.
-    if (req.query.fields) {
-      const fields = req.query.fields.split(",").join(" ");
-      query = query.select(fields);
-    } else {
-      query = query.select("-__v");
-    }
-
-    // 4) PAGINATION
-    // Pagination works with the skip and limit method.
-
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100;
-    const skip = (page - 1) * limit;
-
-    query = query.skip(skip).limit(limit);
-
-    if (req.query.page) {
-      const numTours = await Tour.countDocuments();
-      if (skip >= numTours) throw new Error("Page Does not Exist!");
-    }
-
     // EXECUTE QUERY
     // query.find().sort().select().skip().limit() //Wat The query method is now
-    const features = new APIFeatures().filter();
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
     const tours = await features.query;
-
-    // Querying Using Special Mongoose Methods
-    // const query = await Tour.find() //Find method returns a query, that's why we can chain these methods to it.
-    //   .where("duration")
-    //   .equals(5)
-    //   .where("difficulty")
-    //   .equals("easy");
 
     // SEND RESPONSE
     res.status(200).json({
@@ -191,6 +115,46 @@ exports.deleteTour = async (req, res) => {
   }
 };
 
+// AGGREGATOR PIPELINE
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          _id: { $toUpper: "$difficulty" },
+          numTours: { $sum: 1 },
+          numOfRating: { $sum: "$ratingsQuantity" },
+          avgRating: { $avg: "$ratingsAverage" },
+          avgPrice: { $avg: "$price" },
+          minPrice: { $min: "$price" },
+          maxPrice: { $max: "$price" },
+        },
+      },
+      {
+        $sort: { avgPrice: 1 },
+      },
+      // {
+      //   $match: { _id: { $ne: "EASY" } },
+      // },
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        stats,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "Failed",
+      message: error,
+    });
+  }
+};
+
 // //////////////////
 
 // const allTours = JSON.parse(
@@ -220,3 +184,64 @@ exports.deleteTour = async (req, res) => {
 //   next();
 // };
 // /
+
+//////////////////////////////////////////////////////////
+
+// BUILD QUERY
+
+// 1A) FILTERING Query
+// FIltering works with the find method.
+// const queryObj = { ...req.query };
+// const excludedFields = ["page", "sort", "limit", "fields"];
+// excludedFields.forEach((el) => delete queryObj[el]);
+
+// // 1B) ADVANCED FILTERING (Bringing the gte, gt, lte & lt method into consideration)
+// let queryString = JSON.stringify(queryObj);
+// queryString = queryString.replace(
+//   /\b(gte|gt|lte|lt)\b/g,
+//   (match) => `$${match}`,
+// );
+
+// const queryStr = JSON.parse(queryString);
+
+// let query = Tour.find(queryStr); // First Method of writing a/filter query
+
+// 2) SORTING
+// // Sorting works with the sort method.
+// if (req.query.sort) {
+//   const sortBy = req.query.sort.split(",").join(" ");
+//   query = query.sort(sortBy);
+// } else {
+//   query = query.sort("-createdAt");
+// }
+
+// 3) FIELD LIMITING
+// Limiting field (display certain data) works with the select method.
+// if (req.query.fields) {
+//   const fields = req.query.fields.split(",").join(" ");
+//   query = query.select(fields);
+// } else {
+//   query = query.select("-__v");
+// }
+
+// 4) PAGINATION
+// Pagination works with the skip and limit method.
+
+// const page = req.query.page * 1 || 1;
+// const limit = req.query.limit * 1 || 100;
+// const skip = (page - 1) * limit;
+
+// query = query.skip(skip).limit(limit);
+
+// if (req.query.page) {
+//   const numTours = await Tour.countDocuments();
+//   if (skip >= numTours) throw new Error("Page Does not Exist!");
+// }
+
+////////
+// Querying Using Special Mongoose Methods
+// const query = await Tour.find() //Find method returns a query, that's why we can chain these methods to it.
+//   .where("duration")
+//   .equals(5)
+//   .where("difficulty")
+//   .equals("easy");
