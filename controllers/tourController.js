@@ -1,28 +1,94 @@
 const Tour = require("../models/tourModel");
 
+// SORT OUT THE TOP 5 TOURS
+exports.aliasTopTours = async (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingsAverage,-price";
+  req.query.fields = "name, price, ratingsAverage, difficulty, summary";
+  next();
+};
+
+class APIFeatures {
+  // query gotten from Mongo(Tour.find), queryString from Express(req.query)
+  constructor(query, queryString) {
+    this.query = query;
+    this.queryString = queryString;
+  }
+
+  filter() {
+    // FIltering works with the find method.
+    const queryObj = { ...this.queryString };
+    const excludedFields = ["page", "sort", "limit", "fields"];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // 1B) ADVANCED FILTERING (Bringing the gte, gt, lte & lt method into consideration)
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    const stringifiedQuery = JSON.parse(queryStr);
+
+    this.query = this.query(stringifiedQuery); // First Method of writing a/filter query
+  }
+}
+
 // ROUTE HANDLERS
 exports.getAllTours = async (req, res) => {
   try {
     // BUILD QUERY
-    // 1) Filter Query
-    const queryObj = { ...req.query };
-    const filteredObj = ["page", "sort", "limit", "fields"];
-    filteredObj.forEach((el) => delete queryObj[el]);
 
-    // 2) Advanced Filter (Bringing the gte, gt, lte & lt method into consideration)
-    let queryString = JSON.stringify(queryObj);
-    queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      (match) => `$${match}`,
-    );
+    // 1A) FILTERING Query
+    // FIltering works with the find method.
+    // const queryObj = { ...req.query };
+    // const excludedFields = ["page", "sort", "limit", "fields"];
+    // excludedFields.forEach((el) => delete queryObj[el]);
 
-    const queryStr = JSON.parse(queryString);
-    console.log(queryStr);
+    // // 1B) ADVANCED FILTERING (Bringing the gte, gt, lte & lt method into consideration)
+    // let queryString = JSON.stringify(queryObj);
+    // queryString = queryString.replace(
+    //   /\b(gte|gt|lte|lt)\b/g,
+    //   (match) => `$${match}`,
+    // );
 
-    const query = Tour.find(queryStr); // First Method of writing a/filter query
+    // const queryStr = JSON.parse(queryString);
+
+    // let query = Tour.find(queryStr); // First Method of writing a/filter query
+
+    // 2) SORTING
+    // Sorting works with the sort method.
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort("-createdAt");
+    }
+
+    // 3) FIELD LIMITING
+    // Limiting field (display certain data) works with the select method.
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      query = query.select(fields);
+    } else {
+      query = query.select("-__v");
+    }
+
+    // 4) PAGINATION
+    // Pagination works with the skip and limit method.
+
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) throw new Error("Page Does not Exist!");
+    }
 
     // EXECUTE QUERY
-    const tours = await query;
+    // query.find().sort().select().skip().limit() //Wat The query method is now
+    const features = new APIFeatures().filter();
+    const tours = await features.query;
 
     // Querying Using Special Mongoose Methods
     // const query = await Tour.find() //Find method returns a query, that's why we can chain these methods to it.
