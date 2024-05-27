@@ -115,7 +115,9 @@ exports.deleteTour = async (req, res) => {
   }
 };
 
-// AGGREGATOR PIPELINE
+// AGGREGATION PIPELINE (MATCH AND GROUPING)
+// match basically is to select field(just to do a query)
+// group is to group and work with the operators.
 exports.getTourStats = async (req, res) => {
   try {
     const stats = await Tour.aggregate([
@@ -155,7 +157,62 @@ exports.getTourStats = async (req, res) => {
   }
 };
 
-// //////////////////
+// AGGREGATION PIPELINE (UNWINDING AND PROJECTING)
+// Unwind is to seperate a document by a particular field (e.g startDates, images)
+exports.getMonthlyPlan = async (req, res) => {
+  try {
+    const year = req.params.year * 1; //2021
+
+    const plan = await Tour.aggregate([
+      {
+        $unwind: "$startDates",
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$startDates" },
+          numTourStarts: { $sum: 1 },
+          tours: { $push: "$name" }, //push operator is to push the names into an array
+        },
+      },
+      {
+        $addFields: { month: "$_id" }, // addFields operator allows adding of a field. E.g adding "month" as a field, then using "_id" as it's value.
+      },
+      {
+        $project: {
+          _id: 0, // Project gets rid of a particular field. 0 to hide, 1 to show
+        },
+      },
+      {
+        $sort: { numTourStarts: -1 },
+      },
+      {
+        $limit: 12, //Limits the number of documents to show at once.
+      },
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        plan,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "Failed",
+      message: error,
+    });
+  }
+};
+
+// //////////////////////////////
 
 // const allTours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
