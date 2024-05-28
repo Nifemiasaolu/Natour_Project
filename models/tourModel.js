@@ -76,6 +76,12 @@ tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 
+// DOCUMENT MIDDLEWARE: runs before .create() and .save(), but not .insertMany(), findOne() nor findByIdAndUpdate().
+tourSchema.pre("save", function (next) {
+  console.log(this);
+  next();
+});
+
 const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
