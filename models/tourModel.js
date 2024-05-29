@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const slugify = require("slugify");
 
 const tourSchema = new mongoose.Schema(
   {
@@ -7,6 +8,10 @@ const tourSchema = new mongoose.Schema(
       required: [true, "Tour Name is required"],
       unique: true,
       trim: true,
+    },
+
+    slug: {
+      type: String,
     },
 
     duration: {
@@ -78,7 +83,7 @@ tourSchema.virtual("durationWeeks").get(function () {
 
 // DOCUMENT MIDDLEWARE: runs before .create() and .save(), but not .insertMany(), findOne() nor findByIdAndUpdate().
 tourSchema.pre("save", function (next) {
-  console.log(this);
+  this.slug = slugify(this.name, { lower: true });
   next();
 });
 
@@ -86,4 +91,4 @@ const Tour = mongoose.model("Tour", tourSchema);
 
 module.exports = Tour;
 
-// ///\\\
+// ///\\
