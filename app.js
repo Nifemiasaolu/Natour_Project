@@ -3,6 +3,8 @@ const morgan = require("morgan");
 
 const app = express();
 
+const AppError = require("./utils/appError");
+const globalErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 
@@ -44,6 +46,27 @@ app.use((req, res, next) => {
 // Using the route as middleware.
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
+
+// MIDDLEWARE TO HANDLE UNHANDLED ROUTES
+app.all("*", (req, res, next) => {
+  // OUTDATED WAY OF MIDDLEWARE HANDLING ERROR
+  // res.status(404).json({
+  //   status: "Fail",
+  //   message: `Can't find (${req.originalUrl}) on the server`,
+  // });
+  ///////////////////
+  // CRUDE/OLD METHOD
+  // const err = new Error(`Can't find (${req.originalUrl}) on the server`);
+  // err.statusCode = 404;
+  // err.status = "fail";
+  // next(err);
+
+  // NEW METHOD
+  next(new AppError(`Can't find (${req.originalUrl}) on the server`, 404));
+});
+
+// GLOBAL MIDDLEWARE TO HANDLE ERROR
+app.use(globalErrorHandler);
 
 // START SERVER
 module.exports = app;
