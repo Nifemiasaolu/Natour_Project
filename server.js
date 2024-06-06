@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const logger = require("./utils/logger");
 
 dotenv.config();
 const app = require("./app");
@@ -16,11 +17,31 @@ mongoose
     useFindAndModify: false,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("DB connected successfully!"));
+  .then(() => logger.info("DB connected successfully!"));
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`App listening on port ${port}...`);
+const server = app.listen(port, () => {
+  logger.info(`App listening on port ${port}...`);
 });
 
+// GLOBALLY HANDLE UNHANDLED REJECTIONS
+process.on("unhandledRejection", (err) => {
+  logger.error(`${err.name}: ${err.message}`);
+  logger.error(`UNHANDLED REJECTION!💥: Shutting down...`);
+  // Crashing the operation is OPTIONAL
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// UNCAUGHT EXCEPTIONS
+process.on("uncaughtException", (err) => {
+  logger.error("UNCAUGHT EXCEPTIONS! 💥: Shutting down...");
+  logger.error(`${err.name}: ${err.message}`);
+
+  // Crashing the operation could be compulsory(as there are some hosting platforms that auto restart your server immediately
+  server.close(() => {
+    process.exit(1);
+  });
+});
 // \\\\\\\\\\
