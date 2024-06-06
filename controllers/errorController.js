@@ -1,4 +1,5 @@
 const AppError = require("../utils/appError");
+const logger = require("../utils/logger");
 
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
@@ -6,18 +7,20 @@ const handleCastErrorDB = (err) => {
 };
 
 const handleDuplicateFieldsDB = (err) => {
-  // const value = err.message.match(/(?<=(["']))(?:(?=(\\?))\2.)*?(?=\1)/);
-  // const value = err.keyValue.name;
-  console.log(err.value);
-  console.log(err);
-  const message = `Duplicate field value: x. Please use another value`;
+  const value = err.keyValue.name;
+  const message = `Duplicate field value: (${value}). Please use another value`;
   return new AppError(message, 400);
+};
+
+const handleValidationErrorDB = (err) => {
+  const value = Object.values(err.errors).map((el) => el.message);
+  const message = `Invalid input data: ${value.join(". ")}`;
+  return new AppError(message, 404);
 };
 
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
-
     message: err.message,
     error: err,
     // value: Object.values(err.)
@@ -36,7 +39,7 @@ const sendErrorProd = (err, res) => {
     // Programming, or other unknown error: don't leak error details
   } else {
     // 1) Log error
-    console.error("Error💥", err);
+    logger.error(`Error💥: ${JSON.stringify(err)}`);
 
     // 2) Send generic message
     res.status(500).json({
@@ -59,9 +62,10 @@ const globalErrorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     let error = { ...err };
     // console.log(err.name);
-    console.log(err.code);
+    // logger.info(err.code);
     if (err.name === "CastError") error = handleCastErrorDB(error);
-    if (err.code === "11000") error = handleDuplicateFieldsDB(error);
+    if (err.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (err.name === "ValidationError") error = handleValidationErrorDB(error);
 
     sendErrorProd(error, res);
   }
