@@ -59,7 +59,7 @@ const tourSchema = new mongoose.Schema(
       validate: {
         validator: function (val) {
           // "this" keyword only points to current document on NEW document creation, it doesn't work with the Update method(i.e existing documents)
-          return val < this.price; //CUstom validator
+          return val < this.price; //Custom validator
         },
         message: "Discount price ({VALUE}) should be less than regular price",
       },
