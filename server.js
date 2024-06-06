@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const logger = require("./utils/logger");
 
+// UNCAUGHT EXCEPTIONS
+process.on("uncaughtException", (err) => {
+  logger.error("UNCAUGHT EXCEPTIONS! 💥: Shutting down...");
+  logger.error(`${err.name}: ${err.message}`);
+  // Crashing the operation could be compulsory(as there are some hosting platforms that auto restart your server immediately
+  process.exit(1);
+});
+
 dotenv.config();
 const app = require("./app");
 
@@ -34,14 +42,4 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
-// UNCAUGHT EXCEPTIONS
-process.on("uncaughtException", (err) => {
-  logger.error("UNCAUGHT EXCEPTIONS! 💥: Shutting down...");
-  logger.error(`${err.name}: ${err.message}`);
-
-  // Crashing the operation could be compulsory(as there are some hosting platforms that auto restart your server immediately
-  server.close(() => {
-    process.exit(1);
-  });
-});
 // \\\\\\\\\
