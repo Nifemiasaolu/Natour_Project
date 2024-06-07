@@ -59,7 +59,7 @@ class APIFeatures {
 
 module.exports = APIFeatures;
 
-///////////////////////////////\\\\\\
+///////////////////////////////\\\\\
 // BUILD QUERY
 
 // 1A) FILTERING Query
