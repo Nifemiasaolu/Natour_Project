@@ -20,8 +20,4 @@ router
 
 module.exports = router;
 
-// ////////\\\\\\\
-// {
-//   "username": "byc4LrWAaO8VKS5zGMAMbg==",
-//   "password": "OiMEGrUmnKmHR41phzck3g=="
-// }
+// ////////\\\\\\
