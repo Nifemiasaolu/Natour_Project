@@ -71,9 +71,9 @@ const globalErrorHandler = (err, req, res, next) => {
     let error = Object.create(err);
     error.message = err.message;
     // console.log(err.name);
-    console.log(err.code);
-    logger.info(err.name);
-    logger.info(error.name);
+    // console.log(err.code);
+    // logger.info(err.name);
+    // logger.info(error.name);
     if (err.name === "CastError") error = handleCastErrorDB(error);
     if (err.code === 11000) error = handleDuplicateFieldsDB(error);
     if (err.name === "ValidationError") error = handleValidationErrorDB(error);
