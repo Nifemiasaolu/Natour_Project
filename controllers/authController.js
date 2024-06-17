@@ -3,12 +3,12 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const logger = require("../utils/logger");
 
-const signInToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+const signInToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-};
 
 exports.signup = catchAsync(async (req, res, next) => {
   // const newUser = await User.create(req.body); //This code shows that anyone can signin as an admin, it is a security flaw.
@@ -65,7 +65,7 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.protect = async (req, res, next) => {
-  //Getting token, check if it's there
+  // 1) Getting token, check if it's there
   let token;
   if (
     req.headers.authorization &&
@@ -80,14 +80,45 @@ exports.protect = async (req, res, next) => {
     );
   }
 
-  // Verification token
+  // 2) Verification token
   //  We are to use a callback fnctn, that's why we brought in "promisify"
+
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  // const decoded = await function promise()
 
-  console.log(decoded);
-  // Check if the user exists
+  logger.info(JSON.stringify(decoded));
 
-  // Check if user changed password after the token was issued
+  // catch (err) {
+  //   if (process.env.NODE_ENV === "production") {
+  //     if (err.isOperational) {
+  //       return res.status(401).json({
+  //         status: "Fail",
+  //         message: "Invalid Token. Please log in again.",
+  //       });
+  //     } else {
+  //       logger.error(`Error💥: ${JSON.stringify(err)}`);
+  //
+  //       // 2) Send generic message
+  //       return res.status(500).json({
+  //         status: "error",
+  //         message: "Something went wrong",
+  //       });
+  //     }
+  //   }
+  //
+  //   if (process.env.NODE_ENV === "development") {
+  //     return res.status(401).json({
+  //       status: err.status,
+  //       message: err.message,
+  //       error: err,
+  //       stack: err.stack,
+  //     });
+  //   }
+  // }
+
+  // 3) Check if the user exists
+
+  // 4) Check if user changed password after the token was issued
   next();
 };
 
