@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const logger = require("../utils/logger");
 
 const schema = {
   name: {
@@ -32,6 +33,7 @@ const schema = {
       message: "Passwords are not the same!",
     },
   },
+  passwordChangedAt: Date,
 };
 
 const userSchema = new mongoose.Schema(schema);
@@ -50,12 +52,27 @@ userSchema.pre("save", async function (next) {
 });
 
 // This is an instance method that returns True/False, while comparing the input password to the existing password.
-// An instance method is available on all the documents
+// An instance method (userSchema.methods) is available on all the documents. Documents are instances of a module.
 userSchema.methods.correctPassword = function (
   candidatePassword,
   userPassword,
 ) {
   return bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimeStamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    console.log(changedTimeStamp, JWTTimestamp);
+    // This means if the token generated time is less than the changed password time, return true, which means there's been an alteration on the password, and don't grant access, else return false.
+    return JWTTimestamp < changedTimeStamp;
+  }
+
+  // False means password NOT CHANGED
+  return false;
 };
 
 const User = mongoose.model("User", userSchema);
