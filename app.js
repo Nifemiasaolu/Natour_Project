@@ -55,7 +55,7 @@ app.all("*", (req, res, next) => {
   //   status: "Fail",
   //   message: `Can't find (${req.originalUrl}) on the server`,
   // });
-  ///////////////////\\\\\\\\\\
+  ///////////////////\\\\\\\\\
   // CRUDE/OLD METHOD
   // const err = new Error(`Can't find (${req.originalUrl}) on the server`);
   // err.statusCode = 404;
