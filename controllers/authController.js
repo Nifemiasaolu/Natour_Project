@@ -23,6 +23,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    passwordChangedAt: req.body.passwordChangedAt,
   });
 
   // Create a token for each Users.
@@ -82,43 +83,52 @@ exports.protect = async (req, res, next) => {
 
   // 2) Verification token
   //  We are to use a callback fnctn, that's why we brought in "promisify"
+  let decoded;
+  try {
+    decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    // const decoded = await function promise()
+  } catch (err) {
+    if (process.env.NODE_ENV === "production") {
+      if (err.isOperational) {
+        return res.status(401).json({
+          status: "Fail",
+          message: "Invalid Token. Please log in again.",
+        });
+      } else {
+        logger.error(`Error💥: ${JSON.stringify(err)}`);
 
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  // const decoded = await function promise()
+        // 2) Send generic message
+        return res.status(500).json({
+          status: "error",
+          message: "Something went wrong",
+        });
+      }
+    }
 
-  logger.info(JSON.stringify(decoded));
-
-  // catch (err) {
-  //   if (process.env.NODE_ENV === "production") {
-  //     if (err.isOperational) {
-  //       return res.status(401).json({
-  //         status: "Fail",
-  //         message: "Invalid Token. Please log in again.",
-  //       });
-  //     } else {
-  //       logger.error(`Error💥: ${JSON.stringify(err)}`);
-  //
-  //       // 2) Send generic message
-  //       return res.status(500).json({
-  //         status: "error",
-  //         message: "Something went wrong",
-  //       });
-  //     }
-  //   }
-  //
-  //   if (process.env.NODE_ENV === "development") {
-  //     return res.status(401).json({
-  //       status: err.status,
-  //       message: err.message,
-  //       error: err,
-  //       stack: err.stack,
-  //     });
-  //   }
-  // }
+    if (process.env.NODE_ENV === "development") {
+      return res.status(401).json({
+        status: err.status,
+        message: err.message,
+        error: err,
+        stack: err.stack,
+      });
+    }
+  }
 
   // 3) Check if the user exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(new AppError("The user with this token no longer exists", 401));
+  }
 
   // 4) Check if user changed password after the token was issued
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(
+      new AppError("User recently changed password! Please log in again.", 401),
+    );
+  }
+  // GRANT ACCESS TO PROTECTED ROUTE
+  req.user = currentUser; // Put the entire user data on request.
   next();
 };
 
