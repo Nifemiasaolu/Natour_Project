@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const sendEmail = require("../utils/email");
 const logger = require("../utils/logger");
 
 const signInToken = (id) =>
@@ -24,6 +25,9 @@ exports.signup = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     passwordChangedAt: req.body.passwordChangedAt,
+    role: req.body.role,
+    passwordResetToken: req.body.passwordResetToken,
+    passwordResetExpires: req.body.passwordResetExpires,
   });
 
   // Create a token for each Users.
@@ -65,6 +69,8 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
+// AUTHENTICATION (LOG IN)
+// Check the authenticity of a user, to access the features (i.e if a user is logged in), then he can access the features.
 exports.protect = async (req, res, next) => {
   // 1) Getting token, check if it's there
   let token;
@@ -131,5 +137,38 @@ exports.protect = async (req, res, next) => {
   req.user = currentUser; // Put the entire user data on request.
   next();
 };
+
+// AUTHORIZATION
+// Restrict some features and access to some particular type of user(e.g admin)
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    //   roles ["admin", "lead-guide"]
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You do not have permission to perform this action", 403),
+      );
+    }
+    next();
+  };
+};
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  //   1) Get user based on POSTed email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError("There is no user with this email address", 404));
+  }
+
+  //   2) Generate random reset token
+  const resetToken = user.createPasswordResetToken();
+  logger.info(` *** Reset token: ${resetToken} ****`);
+
+  await user.save({ validateBeforeSave: false });
+  // await user.save({ validateModifiedOnly: true });
+
+  //   3) Send it to user's email
+});
+
+exports.resetPassword = (req, res, next) => {};
 
 ///////\\\\\
