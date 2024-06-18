@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -16,6 +17,11 @@ const schema = {
     validate: [validator.isEmail, "Please provide a valid email"],
   },
   photo: String,
+  role: {
+    type: String,
+    enum: ["user", "guide", "lead-guide"],
+    default: "user",
+  },
   password: {
     type: String,
     required: [true, "Please provide a password."],
@@ -34,6 +40,8 @@ const schema = {
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 };
 
 const userSchema = new mongoose.Schema(schema);
@@ -66,13 +74,34 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
       this.passwordChangedAt.getTime() / 1000,
       10,
     );
-    console.log(changedTimeStamp, JWTTimestamp);
+    console.log(
+      "Changed Time stamp:",
+      changedTimeStamp,
+      "JWTTimeStamp:",
+      JWTTimestamp,
+    );
     // This means if the token generated time is less than the changed password time, return true, which means there's been an alteration on the password, and don't grant access, else return false.
     return JWTTimestamp < changedTimeStamp;
   }
 
   // False means password NOT CHANGED
   return false;
+};
+
+userSchema.methods.createPasswordResetToken = () => {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  logger.info(
+    `Reset Token: ${resetToken} *** Password Reset Token: ${this.passwordResetToken}`,
+  );
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 const User = mongoose.model("User", userSchema);
