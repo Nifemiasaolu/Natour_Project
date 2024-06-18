@@ -19,6 +19,7 @@
     "logger": "^0.0.1",
     "mongoose": "^5.13.22",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.9.13",
     "slugify": "^1.6.6",
     "text-encoding": "^0.7.0",
     "validator": "^13.12.0",
