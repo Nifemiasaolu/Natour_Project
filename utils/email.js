@@ -6,9 +6,9 @@ const logger = require("./logger");
 const sendEmail = async (options) => {
   //   1) Create a transporter
   const transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 465,
-    secure: true,
+    host: process.env.EMAIL_HOST,
+    port: process.env.EMAIL_PORT,
+    secure: false,
     logger: true,
     auth: {
       user: process.env.EMAIL_USERNAME,
