@@ -1,25 +1,33 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 const nodemailer = require("nodemailer");
+
+const logger = require("./logger");
 
 const sendEmail = async (options) => {
   //   1) Create a transporter
   const transporter = nodemailer.createTransport({
-    host: prcess.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
+    host: "sandbox.smtp.mailtrap.io",
+    port: 465,
+    secure: true,
+    logger: true,
     auth: {
       user: process.env.EMAIL_USERNAME,
       pass: process.env.EMAIL_PASSWORD,
     },
     //   Activate in gmail "less secure app" option.
   });
+  logger.info(`------ It got here! --------`);
+  logger.info(`------ Transporter : ${JSON.stringify(transporter)} --------`);
   //   2) Define the email options
   const mailOptions = {
-    from: "Tyrion Scott <tyrion@gmail.com>",
+    from: "Tyrion Scott <derik@gmail.com>",
     to: options.email,
     subject: options.subject,
     text: options.message,
   };
   //   3) Actually send the email
-  await transporter.send(mailOptions);
+  const transporter1 = await transporter.sendMail(mailOptions);
+  logger.info(`===== Transporter : ${JSON.stringify(transporter1)} ========`);
 };
 
 module.exports = sendEmail;
