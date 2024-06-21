@@ -179,7 +179,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       message,
     });
 
-    logger.info(`======== Mail Sent: ${JSON.stringify(mailSent)}`);
+    // logger.info(`======== Mail Sent: ${JSON.stringify(mailSent)}`);
 
     res.status(200).json({
       status: "success",
