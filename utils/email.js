@@ -16,7 +16,7 @@ const sendEmail = async (options) => {
     },
     //   Activate in gmail "less secure app" option.
   });
-  logger.info(`------ It got here! --------`);
+  // logger.info(`------ It got here! --------`);
   logger.info(`------ Transporter : ${JSON.stringify(transporter)} --------`);
   //   2) Define the email options
   const mailOptions = {
