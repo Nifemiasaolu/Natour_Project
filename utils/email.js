@@ -20,7 +20,7 @@ const sendEmail = async (options) => {
   logger.info(`------ Transporter : ${JSON.stringify(transporter)} --------`);
   //   2) Define the email options
   const mailOptions = {
-    from: "Tyrion Scott <derik@gmail.com>",
+    from: '"Tyrion Scott" <derik@gmail.com>',
     to: options.email,
     subject: options.subject,
     text: options.message,
