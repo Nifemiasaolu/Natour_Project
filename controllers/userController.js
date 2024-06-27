@@ -60,7 +60,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 // };
 
 exports.createUser = (req, res) => {
-  const newId = allUsers[allUsers.length - 1]._id + 1;
+  // const newId = allUsers[allUsers.length - 1]._id + 1;
   // const newUser = Object.assign({ id: newId }, req.body);
   // eslint-disable-next-line node/no-unsupported-features/es-syntax
   const newUser = { id: newId, ...req.body };
