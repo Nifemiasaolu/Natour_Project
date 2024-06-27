@@ -107,7 +107,7 @@ userSchema.methods.createPasswordResetToken = function () {
     `Reset Token: ${resetToken} *** Password Reset Token: ${this.passwordResetToken}`,
   );
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-  logger.info(`Password Reset Expires: ${this.passwordResetExpires}`);
+  // logger.info(`Password Reset Expires: ${this.passwordResetExpires}`);
 
   return resetToken;
 };
