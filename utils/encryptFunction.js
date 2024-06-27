@@ -61,9 +61,9 @@ const iVKey = "GgLktwbY/8uw5fs/";
 
 encryptText(plaintext, apiKey, iVKey)
   .then((ciphertext) => {
-    logger.info(
-      ` ============ Encrypted ciphertext: ${ciphertext} ================`,
-    );
+    // logger.info(
+    //   ` ============ Encrypted ciphertext: ${ciphertext} ================`,
+    // );
   })
   .catch((error) => {
     logger.info(`Encryption error: ${error}`);
