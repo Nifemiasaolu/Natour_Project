@@ -42,6 +42,11 @@ const schema = {
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 };
 
 const userSchema = new mongoose.Schema(schema);
@@ -63,6 +68,15 @@ userSchema.pre("save", function (next) {
   if (!this.isModified("password") || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  // This is a query middleware that points to the current query.
+  //   /^find/ means it works for all the query related to find. E.g findById, findOne etc.
+  this.find({ active: { $ne: false } }); // This means that it should bring out result of user docs, that are active(true).
+  // Rather than using {active: true}, note that some of the data in the db might not have the field "active : true", hence, we using { active: { $ne: false }
+
   next();
 });
 
