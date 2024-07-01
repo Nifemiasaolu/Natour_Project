@@ -16,6 +16,22 @@ const signInToken = (id) =>
 const createSendToken = (user, statusCode, res) => {
   const token = signInToken(user._id);
 
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
+    // secure: true, // Cookie will only be sent on an encrypted connection. i.e HTTPS
+    httpOnly: true, // Cookie cannot be accessed or modified in anyway by the browser.
+  };
+
+  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+
+  res.cookie("jwt", token, cookieOptions);
+  //  Cookie is a form of a text that a server sends to a browser, the browser saves it and sends it back with future request to the server.
+
+  // Remove password from output gotten from new document creation.
+  user.password = undefined;
+
   res.status(statusCode).json({
     status: "Success",
     token,
