@@ -1,5 +1,10 @@
 const express = require("express");
 const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const hpp = require("hpp");
 
 const app = express();
 
@@ -8,15 +13,46 @@ const globalErrorHandler = require("./controllers/errorController");
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 
-// MIDDLEWARE FOR ALL OF THE ROUTES
+// MIDDLEWARE FOR ALL OF THE ROUTES (GLOBAL)
 
-// 3rd Party Middleware
+// Set security HTTP headers
+app.use(helmet());
+
+// 3rd Party Middleware (Development Logging)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Middlewawre for body-parser
-app.use(express.json());
+// Rate Limiting Middleware
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: "Too many request from this IP, please try again in an hour",
+});
+app.use("/api", limiter);
+
+// Body-parser Middleware (Reading data from body into req.body)
+app.use(express.json({ limit: "10kb" }));
+
+// Data sanitization against NOSQL query injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent Parameter Pollution
+app.use(
+  hpp({
+    whitelist: [
+      "duration",
+      "ratingsQuantity",
+      "ratingsAverage",
+      "maxGroupSize",
+      "difficulty",
+      "price",
+    ],
+  }),
+);
 
 // Serving static files
 app.use(express.static(`${__dirname}/public`)); // Uses it to access static file in our system. Access http://localhost/overview.html on browser
@@ -27,6 +63,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Test Middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   console.log(req.requestTime);
