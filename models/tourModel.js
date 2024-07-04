@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
+// const User = require("./userModel");
 // const validator = require("validator");
 
 const tourSchema = new mongoose.Schema(
@@ -91,6 +92,44 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      //   GeoJSON
+      //   To specify GeoSpatial data with MongoDB,  We create a new object containing "type" and 'coordinates", so for the schema to know that this is a GeoSpatial Model
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      coordinates: [Number], // It means we expect an array of Numbers. In GeoJsON, this array is of coordinates, with Longitude first, then Latitude next (long, lat).
+      //   In Google map, it's (lat, long).
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    // guides: Array, //  Embedding Data Model (Connecting User to Tour). It contains all details of the User into the tour guide.
+
+    // The reason we're using the reference model, is in scenario where there's a change in user detail (update), it would be a lot of work coming to the tour model, to update that same user that's just been updated. Hence, we just use the reference model method, to link the user directly to the tour, so any change on the user would majorly have direct effect on that same user in the tour model(due to the id link).
+
+    // Reference/Normalized Data model
+    guides: [
+      // This makes sure it contains just the IDs of the Users, and not their corresponding data, like that of the Embedding/Denormalized Model
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+      },
+    ],
   },
 
   {
@@ -110,6 +149,13 @@ tourSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+
+// Saving user guides(by Id) into the tour, from the User model (Connecting Users into Tours by EMBEDDING)
+// tourSchema.pre("save", async function (next) {
+//   const guidePromise = this.guides.map(async (id) => await User.findById(id));
+//   this.guides = await Promise.all(guidePromise);
+//   next();
+// });
 
 // tourSchema.pre("save", (next) => {
 //   console.log("Will save document...");
