@@ -127,7 +127,7 @@ const tourSchema = new mongoose.Schema(
       // This makes sure it contains just the IDs of the Users, and not their corresponding data, like that of the Embedding/Denormalized Model
       {
         type: mongoose.Schema.ObjectId,
-        ref: "User",
+        ref: "User", //This creates a reference to another model (User). this is how to connect the models.
       },
     ],
   },
@@ -168,7 +168,7 @@ tourSchema.pre("save", function (next) {
 //   next();
 // });
 
-// QUERY MIDDLEWARE: runs before or after a certain query is executed (e.g FIND query)
+// QUERY MIDDLEWARE: runs before a certain query is executed (e.g FIND query)
 
 // tourSchema.pre("find", function (next) {
 tourSchema.pre(/^find/, function (next) {
@@ -176,6 +176,19 @@ tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } }); // This means that it should find and bring forth docs that has secretTour(false);
 
   this.start = Date.now();
+  next();
+});
+
+// This population is done for the current doc/id being queried.
+// This is a nice trick, in case you want to populate for all your document.
+// NOTE: Population does not affect the db, i.e the populated data are not shown on the db,
+// they are shown to the clients when the id(get tour) or get all tours are called.
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    //Populate here means fill up the details/data of this field(guides), when you query for a particular tour.
+    path: "guides",
+    select: "-__v -passwordChangedAt",
+  });
   next();
 });
 
