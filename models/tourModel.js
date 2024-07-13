@@ -143,6 +143,14 @@ tourSchema.virtual("durationWeeks").get(function () {
   return this.duration / 7;
 });
 
+// Virtual Populate
+// This is a scenario, where we want the tour to have access to it's reviews, without going through the Parent-Child referencing(as done on Review Model) again. Rather than doing that, we use virtual populate (from mongoDB) to access the review of that particular tourID.
+tourSchema.virtual("reviews", {
+  ref: "Review", // Refers to the Review Model
+  foreignField: "tour", // Refers to "tour" field in the Review model.
+  localField: "_id", // This is the id in the local Tour model. Which means we're connecting the local tour model by Id to the foreign Tour field that's in Reviews.
+});
+
 // DOCUMENT MIDDLEWARE: runs before .create() and .save(), but not .insertMany(), findOne() nor findByIdAndUpdate() and the others (update inclusive).
 // Pre-save Hook/Middleware
 tourSchema.pre("save", function (next) {
