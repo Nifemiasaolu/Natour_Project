@@ -1,6 +1,8 @@
 const express = require("express");
 const tourController = require("../controllers/tourController");
 const authController = require("../controllers/authController");
+// const reviewController = require("../controllers/reviewController");
+const reviewRouter = require("./reviewRoutes");
 
 const router = express.Router();
 
@@ -8,6 +10,21 @@ const router = express.Router();
 // router.param("id", tourController.checkID);
 // router.param("post", tourController.checkBody);
 // Creating Router
+
+// Nested Routes
+// POST /tour/235fhe/reviews
+// GET /tour/234tfdsd/reviews
+// GET /tour/234tfdsd/reviews/2354fdsd4
+// router
+//   .route("/:tourId/reviews")
+//   .post(
+//     authController.protect,
+//     authController.restrictTo("user"),
+//     reviewController.createReview,
+//   );
+
+// Mounting Nested Route
+router.use("/:tourId/reviews", reviewRouter);
 
 router
   .route("/top-5-tours")
