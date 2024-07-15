@@ -1,6 +1,8 @@
 const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const factory = require("./handlerFactory");
+
 // const AppError = require("../utils/appError");
 
 const filteredObj = (obj, ...allowedFields) => {
@@ -34,10 +36,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
       ),
     );
   }
-
   //    2) Filtered Out unwanted field names that are not allowed to be updated.
   const filteredBody = filteredObj(req.body, "name", "email");
-
   //   3) Update the user
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
@@ -60,87 +60,20 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-// const getAllUsers = (req, res) => {
-//   res.status(500).json({
-//     status: "error",
-//     message: "This route is not yet defined!",
-//   });
-// };
+exports.createUser = factory.createOne(User);
 
-exports.createUser = (req, res) => {
-  // const newId = allUsers[allUsers.length - 1]._id + 1;
-  // const newUser = Object.assign({ id: newId }, req.body);
-  // eslint-disable-next-line node/no-unsupported-features/es-syntax
-  const newUser = { id: newId, ...req.body };
+// Do NOT update password with this!.
+// This Update User is only for admin. Used to update data that's not the password.
+exports.updateUser = factory.updateOne(User);
 
-  allUsers.push(newUser);
-
-  fs.writeFile(
-    `${__dirname}/dev-data/data/users.json`,
-    JSON.stringify(allUsers),
-    () => {
-      res.status(201).json({
-        status: "success",
-        data: {
-          user: newUser,
-        },
-      });
-    },
-  );
-};
+exports.deleteUser = factory.deleteOne(User);
 
 exports.getUser = (req, res) => {
-  console.log(req.params);
-
-  const { id } = req.params;
-  const user = allUsers.find((el) => el._id === id);
-  console.log(user);
-
-  // if(id > allUsers.length) {
-  if (!user) {
-    return res.status(404).json({
-      status: "failed",
-      message: "Invalid ID",
-    });
-  }
-
   res.status(200).json({
     status: "success",
     data: {
-      user,
+      // user,
     },
-  });
-};
-
-exports.updateUser = (req, res) => {
-  console.log(req.params);
-
-  if (req.params.id * 1 > allUsers.length) {
-    return res.status(404).json({
-      status: "Failed",
-      message: "Invalid ID",
-    });
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: "<Tour Updated...>",
-  });
-};
-
-exports.deleteUser = (req, res) => {
-  console.log(req.params);
-
-  if (req.params.id * 1 > allUsers.length) {
-    return res.status(404).json({
-      status: "Failed",
-      message: "Invalid ID",
-    });
-  }
-
-  res.status(204).json({
-    status: "success",
-    message: "Id deleted successfully...",
   });
 };
 
