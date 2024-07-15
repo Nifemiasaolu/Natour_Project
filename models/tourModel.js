@@ -189,7 +189,7 @@ tourSchema.pre(/^find/, function (next) {
 
 // This population is done for the current doc/id being queried.
 // This is a nice trick, in case you want to populate for all your document.
-// NOTE: Population does not affect the db, i.e the populated data are not shown on the db,
+// NOTE: Population does not affect the db, i.e the populated data are not shown on the db(just the id shows),
 // they are shown to the clients when the id(get tour) or get all tours are called.
 tourSchema.pre(/^find/, function (next) {
   this.populate({
