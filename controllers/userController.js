@@ -13,18 +13,14 @@ const filteredObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
-
-  // SEND RESPONSE
-  res.status(200).json({
-    status: "success",
-    results: users.length,
-    data: {
-      users,
-    },
-  });
-});
+// This is to get the info about the current user.
+// The id of the user is gotten from the currently logged in user, and the user is "disguised" as the params.id,
+// thereby sending it to the getUser, to get the info about the current user.
+// It's a good hack. Check the route to understand better.
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   //   1) Create Error if user POSTs password data
@@ -60,21 +56,31 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.createUser = factory.createOne(User);
-
+exports.createUser = (req, res, next) => {
+  res.status(500).json({
+    status: "Error",
+    message:
+      "This route is not valid. Please use the /api/v1/users/signup route.",
+  });
+};
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
 // Do NOT update password with this!.
 // This Update User is only for admin. Used to update data that's not the password.
 exports.updateUser = factory.updateOne(User);
-
 exports.deleteUser = factory.deleteOne(User);
 
-exports.getUser = (req, res) => {
-  res.status(200).json({
-    status: "success",
-    data: {
-      // user,
-    },
-  });
-};
-
 // //\///\\
+
+// exports.getAllUsers = catchAsync(async (req, res, next) => {
+//   const users = await User.find();
+//
+//   // SEND RESPONSE
+//   res.status(200).json({
+//     status: "success",
+//     results: users.length,
+//     data: {
+//       users,
+//     },
+//   });
+// });
