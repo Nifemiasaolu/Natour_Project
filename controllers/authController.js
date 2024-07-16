@@ -68,18 +68,14 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError("Please provide email and password", 404));
   }
-
   // 2)  Check if User exists && password is correct
   const user = await User.findOne({ email }).select("+password");
-
   // If the "user" doesn't exist, then there will be no "correct"
   // const correct = await user.correctPassword(password, user.password);
-
   // If there's no user, or there's a wrong password, return this error.
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("Incorrect email or password", 401));
   }
-
   //  3) If everything is okay, Send token to client
   createSendToken(user, 200, res);
 });
@@ -95,13 +91,11 @@ exports.protect = async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(" ")[1];
   }
-
   if (!token) {
     return next(
       new AppError("You are not logged in! Please log in to get access.", 401),
     );
   }
-
   // 2) Verification token
   //  We are to use a callback fnctn, that's why we brought in "promisify"
   let decoded;
@@ -117,7 +111,6 @@ exports.protect = async (req, res, next) => {
         });
       } else {
         logger.error(`Error💥: ${JSON.stringify(err)}`);
-
         // 2) Send generic message
         return res.status(500).json({
           status: "error",
@@ -125,7 +118,6 @@ exports.protect = async (req, res, next) => {
         });
       }
     }
-
     if (process.env.NODE_ENV === "development") {
       return res.status(401).json({
         status: err.status,
@@ -135,13 +127,11 @@ exports.protect = async (req, res, next) => {
       });
     }
   }
-
   // 3) Check if the user exists
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return next(new AppError("The user with this token no longer exists", 401));
   }
-
   // 4) Check if user changed password after the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
