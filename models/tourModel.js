@@ -144,7 +144,9 @@ tourSchema.virtual("durationWeeks").get(function () {
 });
 
 // Virtual Populate
-// This is a scenario, where we want the tour to have access to it's reviews, without going through the Parent-Child referencing(as done on Review Model) again. Rather than doing that, we use virtual populate (from mongoDB) to access the review of that particular tourID.
+// This is a scenario, where we want the tour to have access to it's reviews,
+// without going through the Parent-Child referencing(as done on Review Model) again.
+// Rather than doing that, we use virtual populate (from mongoDB) to access the review of that particular tourID.
 tourSchema.virtual("reviews", {
   ref: "Review", // Refers to the Review Model
   foreignField: "tour", // Refers to "tour" field in the Review model.
