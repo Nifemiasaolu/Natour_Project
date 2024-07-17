@@ -97,3 +97,5 @@ exports.deleteOne = (Model) =>
       message: "Id deleted successfully...",
     });
   });
+
+/////////////
