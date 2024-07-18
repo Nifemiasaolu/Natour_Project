@@ -53,6 +53,7 @@ const tourSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: [true, "Tour Price is required"],
+      // index: true,
     },
 
     priceDiscount: {
@@ -137,6 +138,11 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   },
 );
+
+// Compound Index
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+// 1 => Ascending
+// -1 => Descending
 
 // VIRTUAL PROPERTY
 tourSchema.virtual("durationWeeks").get(function () {
