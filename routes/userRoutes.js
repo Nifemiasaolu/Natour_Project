@@ -6,23 +6,39 @@ const router = express.Router();
 
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
-
 router.post("/forgotPassword", authController.forgotPassword);
 router.patch("/resetPassword/:token", authController.resetPassword);
 
+// Authentication Middleware: Protect All Routes After This Middleware
+// Remember that middleware runs in sequence.
+router.use(authController.protect);
+//This middleware runs first, before any of the below, and it protects all of the below middlewares.
+
 router.patch(
   "/updateMyPassword",
-  authController.protect,
+  // authController.protect, //This is removed because the Protect middleware function is already performing this task, also for the ones below.
   authController.updatePassword,
 );
 router.get(
   "/getMe",
-  authController.protect,
+  // authController.protect,
   userController.getMe,
   userController.getUser,
 );
-router.patch("/updateMe", authController.protect, userController.updateMe);
-router.delete("/deleteMe", authController.protect, userController.deleteMe);
+router.patch(
+  "/updateMe",
+  // authController.protect,
+  userController.updateMe,
+);
+
+router.delete(
+  "/deleteMe",
+  // authController.protect,
+  userController.deleteMe,
+);
+
+// Restrict All Routes After This Middleware.
+router.use(authController.restrictTo("admin"));
 
 // Creating Router
 router
