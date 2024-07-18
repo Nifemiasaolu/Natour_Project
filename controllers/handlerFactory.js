@@ -16,8 +16,8 @@ exports.getAll = (Model) =>
       .sort()
       .limitFields()
       .paginate();
-    // const doc = await features.query.explain();
-    const doc = await features.query.explain();
+    // const doc = await features.query.explain(); //Explain: To explain the data better when it's being queried. Shows some indepth details about the data, and also helps with indexing.
+    const doc = await features.query;
 
     // SEND RESPONSE
     res.status(200).json({
