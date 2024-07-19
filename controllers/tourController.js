@@ -20,7 +20,7 @@ exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour);
 
-////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 // exports.getAllTours = catchAsync(async (req, res, next) => {
 //   // EXECUTE QUERY
 //   // query.find().sort().select().skip().limit() //Wat The query method is now
