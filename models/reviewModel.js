@@ -78,3 +78,54 @@ const Review = mongoose.model("Review", reviewSchema);
 
 module.exports = Review;
 ///////\\\\
+
+
+
+// import CustomError from "../../src/api/modules/custom-error";
+// import { BAD_REQUEST, FORBIDDEN } from "../../src/api/modules/status";
+
+// it("should handle errors when fetching geolocation data", async () => {
+//   const ip = "8.frs.8.8";
+//   const errorMessage = "Fetching Geolocation Data Failed";
+//   const statusCode = FORBIDDEN;
+//
+//   // geoLocationStub = sinon.stub(request, "get").rejects(errorMessage);
+//
+//   geoLocationStub = sinon.stub(request, "get").rejects({
+//     statusCode,
+//     message: errorMessage,
+//   });
+//
+//   await expect(geoLocation(ip)).to.be.rejectedWith(CustomError, errorMessage);
+//
+//   // await expect(geoLocation(ip)).to.be.rejectedWith(
+//   //   CustomError({
+//   //     statusCode: FORBIDDEN,
+//   //     message: "Fetching Geolocation Data Failed",
+//   //   })
+//   // );
+// });
+// it("should handle errors from populating ipUserInfo", async () => {
+//   const errorMessage = "Geolocation Middleware Error";
+//
+//   geoLocationStub = sinon
+//     .stub(request, "get")
+//     .rejects(new Error(errorMessage));
+//
+//   await ipUserInfo(req, res, next);
+//
+//   // expect(res.send).to.have.been.calledWith(BAD_REQUEST, {
+//   //   status: false,
+//   //   message: "Error in geolocation middleware",
+//   // });
+//
+//   // expect(res.send.called).to.be.true;
+//   expect(res.send.callCount).to.equal(1);
+//   expect(res.send.args[0][0]).to.equal(BAD_REQUEST);
+//   expect(res.send.args[0][1]).to.deep.equal({
+//     status: false,
+//     message: "Geolocation Middleware Error",
+//   });
+//
+//   expect(next.called).to.be.false;
+// });
