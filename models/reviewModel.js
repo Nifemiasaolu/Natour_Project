@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Tour = require("../models/tourModel")
 
 //review /rating / createdAt / ref to tour / ref to user
 
@@ -36,6 +37,9 @@ const reviewSchema = new mongoose.Schema(schema, {
   toObject: { virtuals: true },
 });
 
+// This ensures that a user can only make/create just one review on one tour.
+reviewSchema.index({tour: 1, user: 1}, { unique: true})
+
 reviewSchema.pre(/^find/, function (next) {
   // this.populate({
   //   path: "tour",
@@ -55,7 +59,7 @@ reviewSchema.pre(/^find/, function (next) {
 reviewSchema.statics.calcAverageRatings = async function (tourId) {
   const stats = await this.aggregate([ //The aggregate method is performed on the current model(this => Review)
     {
-      $match: { tour: tourId },
+      $match: { tour: tourId }, // This means select by tourId.
     },
     {
       $group: {
@@ -66,12 +70,66 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
       },
     },
   ]);
-  console.log(stats);
+  // console.log("Stats: ",stats);
+
+  if(stats.length > 0){
+
+  await Tour.findByIdAndUpdate(tourId, {
+    ratingsQuantity: stats[0].nRating,
+    ratingsAverage: stats[0].avgRating.toFixed(1),
+  })
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    })
+  }
 };
 
+// This Post-save middleware is called in order to use the calcAverageRatings function, after the doc is saved.
+// NOTE: POST middleware doesn't have access to the next function, only PRE-save middleware.
 reviewSchema.post("save", function() {
   // this points to current review
-  this.calcAverageRatings(this.tour)
+  // The function is available on the model (this => Review)
+  this.constructor.calcAverageRatings(this.tour) //constructor is the model that created the document.
+})
+
+////////////////////////////////////////
+// Teaches a simple trick of going around a query middleware to get a document off it (const r = await this.findOne()).
+// findByIdAndUpdate
+// findByIdAndDelete
+// Here, we don't have doc middleware, we have query middleware, and in query middleware, we don't have direct access to the document,
+// in order to do something similar to this ( this.constructor.calcAverageRatings(this.tour).
+// Need access to current review document, to extract the tourId, but we're using query middleware here, and don't have access to it.
+
+// reviewSchema.pre(/^findOneAnd/, async function(next) {
+// // The goal is to get access to the current review document, but the "this" keyword, is the current query.
+//  // Execute the current query with findOne, and it gives us the document that's currently being processed.
+
+//  this.r = await this.findOne();
+//   console.log("This.r: ",this.r);
+//  next()
+// })
+
+// The Pre-findOneAnd here means that the review change(either update or delete) has occured on the document at this point,
+// but it's not been persisted(changed or updated) yet, on the db.
+// It's just a Pre-save phase.
+
+// reviewSchema.post(/^findOneAnd/, async function() {
+// //   await this.findOne(). does NOT work here, query has already been executed.
+// // We want to get access to the current tour from the Pre-save, and to do that, rather than saving the query execution into a variable (const r), we save it into a "this" property of it's own(this.r), so that we have access to the current tour(in the document).
+// //   CalcAverageRatings is a static method and it needs to be called on the model, and the current model is "this.r=> this" also means => this.constructor(just like using it in Pre-save middleware).
+
+//   await this.r.constructor.calcAverageRatings(this.r.tour);
+// })
+
+// The Post-save here now persists(updates) the review change in the database.
+
+//////////////////////////////////////////////////////
+// Updated way of writing the Pre and Post findOneAnd (for updating and deleting review), that's above. Pretty much straightforward.
+reviewSchema.post(/^findOneAnd/, async function(doc, next) {
+  await doc.constructor.calcAverageRatings(doc.tour);
+  next();
 })
 
 const Review = mongoose.model("Review", reviewSchema);
