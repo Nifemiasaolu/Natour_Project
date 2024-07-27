@@ -1,7 +1,7 @@
 const Tour = require("../models/tourModel");
 // const APIFeatures = require("../utils/apiFeatures");
 const catchAsync = require("../utils/catchAsync");
-// const AppError = require("../utils/appError");
+const AppError = require("../utils/appError");
 const factory = require("./handlerFactory");
 
 // SORT OUT THE TOP 5 TOURS
@@ -181,7 +181,41 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
   });
 });
 
-// ////////////////////\\
+// router.route("/tours-within/distance/:distance/center/:latlng/unit/:unit")
+
+exports.getToursWithin = catchAsync( async (req, res, next) => {
+  const {distance, latlng, unit} = req.params;
+
+  const [lat, lng] = latlng.split(",")
+  if(!lat || !lng) {
+    return next(new AppError("Please provide your latitude and longitude in the format lat,lng.", 400))
+  }
+
+  console.log(distance, lat,lng, unit);
+
+  const tours = await Tour.findOne({
+    startLocation: {
+      $geoWithin: {
+        $centerSphere: [
+          [lng, lat] // NOTE: In GeoJSON, the Longitude is always written first, then the Latitude next [lng, lat]. while in normal coordinates, the Latitude is written first [lat, lng]
+        ]
+      }
+    }
+  })
+
+  res.status(200).json({
+    status: 'Success',
+    data: {
+      data: tours
+    }
+  })
+
+})
+
+
+
+
+// ////////////////////\\/////////////////////////////////////////
 // const allTours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 // );
