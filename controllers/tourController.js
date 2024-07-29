@@ -197,7 +197,8 @@ exports.getToursWithin = catchAsync( async (req, res, next) => {
     startLocation: {
       $geoWithin: {
         $centerSphere: [
-          [lng, lat] // NOTE: In GeoJSON, the Longitude is always written first, then the Latitude next [lng, lat]. while in normal coordinates, the Latitude is written first [lat, lng]
+          [lng, lat], // NOTE: In GeoJSON, the Longitude is always written first, then the Latitude next [lng, lat]. while in normal coordinates pairs, the Latitude is written first [lat, lng]
+          radius
         ]
       }
     }
