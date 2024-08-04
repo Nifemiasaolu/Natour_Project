@@ -30,7 +30,7 @@ router
 
 module.exports = router;
 
-////\\\\\\\\
+////\\\\\\\
 // nameOnReceipt: "name 2",
 // timeCreated: Date.now(),
 // terminalAssignedStatus: true,
