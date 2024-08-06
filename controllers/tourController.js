@@ -216,7 +216,7 @@ exports.getToursWithin = catchAsync( async (req, res, next) => {
 
 
 
-// ////////////////////\\/////////////////////////////////////\\\
+// ////////////////////\\/////////////////////////////////////\\
 // const allTours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
 // );
