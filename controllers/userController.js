@@ -70,7 +70,7 @@ exports.getUser = factory.getOne(User);
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);
 
-// //\///
+// //\//
 
 // exports.getAllUsers = catchAsync(async (req, res, next) => {
 //   const users = await User.find();
