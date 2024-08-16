@@ -1,3 +1,17 @@
 ###
 GET http://localhost:8000/api/v1/tours
 
+###
+GET ('https://integrations.getravenbank.com/v1', {
+headers: {
+'Authorization': `Bearer ${process.env.RAVEN_API_KEY}`
+}
+})
+
+###
+
+axios.get('https://integrations.getravenbank.com/v1', {
+  headers: {
+    'Authorization': `Bearer ${live_secret_key}`
+  }
+})
