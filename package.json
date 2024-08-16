@@ -11,6 +11,7 @@
   "author": "Nifemi Asaolu",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.4",
     "bcryptjs": "^2.4.3",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
