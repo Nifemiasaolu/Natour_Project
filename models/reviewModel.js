@@ -94,7 +94,7 @@ reviewSchema.post("save", function() {
   this.constructor.calcAverageRatings(this.tour) //constructor is the model that created the document.
 })
 
-///////////////////////////////
+//////////////////////////////
 // Teaches a simple trick of going around a query middleware to get a document off it (const r = await this.findOne()).
 // findByIdAndUpdate
 // findByIdAndDelete
