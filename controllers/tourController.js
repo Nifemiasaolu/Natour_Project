@@ -185,6 +185,9 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
 
 exports.getToursWithin = catchAsync( async (req, res, next) => {
   const {distance, latlng, unit} = req.params;
+  
+  const radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1; // This makes sure the radius is in radians.
+  console.log("Radius: ", radius);
 
   const [lat, lng] = latlng.split(",")
   if(!lat || !lng) {
@@ -193,19 +196,21 @@ exports.getToursWithin = catchAsync( async (req, res, next) => {
 
   console.log(distance, lat,lng, unit);
 
-  const tours = await Tour.findOne({
+  const tours = await Tour.find({
     startLocation: {
       $geoWithin: {
         $centerSphere: [
-          [lng, lat], // NOTE: In GeoJSON, the Longitude is always written first, then the Latitude next [lng, lat]. while in normal coordinates pairs, the Latitude is written first [lat, lng]
+          [lng, lat], // NOTE: In GeoJSON, the Longitude is always written first, then the Latitude next [lng, lat]. while in normal coordinates pairs(e.g maps), the Latitude is written first [lat, lng]
           radius
         ]
       }
     }
   })
+  console.log("Tours: ", JSON.stringify(tours))
 
   res.status(200).json({
     status: 'Success',
+    tours: tours.length,
     data: {
       data: tours
     }
