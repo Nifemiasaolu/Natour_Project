@@ -218,12 +218,12 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 // AGGREGATION MIDDLEWARE
-tourSchema.pre("aggregate", function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // this means that even on aggregate(calling the getTourStats route), we don't want the documents with secretTour being "true" to get out, we are calling for secretTour(false);
+// tourSchema.pre("aggregate", function (next) {
+  // this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // this means that even on aggregate(calling the getTourStats route), we don't want the documents with secretTour being "true" to get out, we are calling for secretTour(false);
   // unshift method there, sets the "$match" operator to the beginning of the array.
-  console.log(this.pipeline());
-  next();
-});
+//   console.log(this.pipeline());
+//   next();
+// });
 
 const Tour = mongoose.model("Tour", tourSchema);
 
