@@ -43,15 +43,16 @@ router
 router.route("/tours-within/distance/:distance/center/:latlng/unit/:unit").get(tourController.getToursWithin)
 // /tour-within/distance/234/center/-45,79/unit/mi => Path Params
 // /tour-within?distance=234&center=-45,79&unit= mi => Query Params
-// /tour-within/distance/2345/center/41.593666,-87.9191424/unit/mi
+// /tour-within/distance/2345/center/41.593666,-87.9191424/unit/mi:
 
+router.route("/distances/:latlng/unit/:unit").get(tourController.getDistances)
 
 router
   .route("/")
   .get(tourController.getAllTours)
   .post(
     authController.protect,
-    authController.restrictTo("admin, lead-guide"),
+    authController.restrictTo("admin", "lead-guide"),
     tourController.createTour,
   );
 
