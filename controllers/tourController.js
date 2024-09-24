@@ -185,7 +185,7 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
 
 exports.getToursWithin = catchAsync( async (req, res, next) => {
   const {distance, latlng, unit} = req.params;
-  
+
   const radius = unit === "mi" ? distance / 3963.2 : distance / 6378.1; // This makes sure the radius is in radians.
   console.log("Radius: ", radius);
 
@@ -206,7 +206,6 @@ exports.getToursWithin = catchAsync( async (req, res, next) => {
       }
     }
   })
-  console.log("Tours: ", JSON.stringify(tours))
 
   res.status(200).json({
     status: 'Success',
@@ -218,6 +217,42 @@ exports.getToursWithin = catchAsync( async (req, res, next) => {
 
 })
 
+exports.getDistances = catchAsync(async (req,res, next) => {
+  const {latlng, unit} = req.params;
+  const [lat, lng] = latlng.split(",")
+  const multiplier = unit === "mi" ? 0.006213 : 0.001;
+
+  if(!lat || !lng) {
+    return next(new AppError("Please provide your latitude and longitude in the format lat,lng.", 400))
+  }
+
+  const distances = await Tour.aggregate([
+  {
+    $geoNear: { // NB: geoNear always need to be the first stage in the pipeline.
+      near: {
+        type: "Point",
+        coordinates: [lng * 1, lat * 1]
+      },
+      distanceField: "distance",
+      distanceMultiplier: multiplier, // (converts distance to Kilometers)
+      spherical: true,
+    }
+  },
+    {
+      $project: {
+        distance: 1,
+        name: 1,
+      }
+    }
+  ])
+
+  res.status(200).json({
+    status: 'Success',
+    data: {
+      data: distances
+    }
+  })
+})
 
 
 
