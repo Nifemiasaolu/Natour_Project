@@ -17,7 +17,7 @@ exports.createReview = factory.createOne(Review);
 exports.updateReview = factory.updateOne(Review);
 exports.deleteReview = factory.deleteOne(Review);
 
-//////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 // exports.getAllReviews = catchAsync(async (req, res, next) => {
 //   let filter = {};
 //   // GET Nested routes
