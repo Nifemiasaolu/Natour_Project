@@ -5,8 +5,8 @@ const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
-
-const app = express();
+const pug = require("pug");
+const path = require("path");
 
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
@@ -14,7 +14,16 @@ const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 const reviewRouter = require("./routes/reviewRoutes");
 
+const app = express();
+
+// Pug Template Engine
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
+
 // MIDDLEWARE FOR ALL OF THE ROUTES (GLOBAL)
+// Serving static files
+// app.use(express.static(`${__dirname}/public`)); // Uses it to access static file in our system. Access http://localhost/overview.html on browser
+app.use(express.static(path.join(__dirname, "public")));
 
 // Set security HTTP headers
 app.use(helmet());
@@ -55,9 +64,6 @@ app.use(
   }),
 );
 
-// Serving static files
-app.use(express.static(`${__dirname}/public`)); // Uses it to access static file in our system. Access http://localhost/overview.html on browser
-
 //  Our Own MiddleWare
 app.use((req, res, next) => {
   console.log("Hello From The MiddleWare World 🙌");
@@ -81,6 +87,13 @@ app.use((req, res, next) => {
 //////////////////////////////////
 
 // MIDDLEWARE FOR TOUR AND USER ROUTES
+// Pug Route
+app.get("/", (req, res) => {
+  res.status(200).render('base', {
+    tour: "The Forest Hikers",
+    user: "Jonas"
+  })
+});
 // Mounting Routers
 // Using the route as middleware.
 app.use("/api/v1/tours", tourRouter);
