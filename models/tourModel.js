@@ -43,7 +43,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, "Rating must be above 1.0"],
       max: [5, "Rating must be below 5.0"],
-      set: val => Math.round(val * 10) / 10 // Rounds a 4.666666 to 4.7
+      set: (val) => Math.round(val * 10) / 10, // Rounds a 4.666666 to 4.7
     },
 
     ratingsQuantity: {
@@ -132,6 +132,13 @@ const tourSchema = new mongoose.Schema(
         ref: "User", //This creates a reference to another model (User). this is how to connect the models.
       },
     ],
+
+    // reviews: [
+    //   {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: "Review",
+    //   },
+    // ],
   },
 
   {
@@ -145,7 +152,7 @@ tourSchema.index({ price: 1, ratingsAverage: -1 });
 // 1 => Ascending
 // -1 => Descending
 tourSchema.index({ slug: 1 });
-tourSchema.index({startLocation: "2dsphere"})
+tourSchema.index({ startLocation: "2dsphere" });
 
 // VIRTUAL PROPERTY
 tourSchema.virtual("durationWeeks").get(function () {
@@ -219,8 +226,8 @@ tourSchema.post(/^find/, function (docs, next) {
 
 // AGGREGATION MIDDLEWARE
 // tourSchema.pre("aggregate", function (next) {
-  // this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // this means that even on aggregate(calling the getTourStats route), we don't want the documents with secretTour being "true" to get out, we are calling for secretTour(false);
-  // unshift method there, sets the "$match" operator to the beginning of the array.
+// this.pipeline().unshift({ $match: { secretTour: { $ne: true } } }); // this means that even on aggregate(calling the getTourStats route), we don't want the documents with secretTour being "true" to get out, we are calling for secretTour(false);
+// unshift method there, sets the "$match" operator to the beginning of the array.
 //   console.log(this.pipeline());
 //   next();
 // });
