@@ -1,9 +1,9 @@
-const express = require("express")
-const viewController = require("../controllers/viewController")
+const express = require("express");
+const viewController = require("../controllers/viewController");
 
-const router = express.Router()
+const router = express.Router();
 
-router.get("/overview", viewController.getOverview)
-app.get("/tour", viewController.getTourDetail)
+router.get("/", viewController.getOverview);
+router.get(`/tour/:slug`, viewController.getTour);
 
 module.exports = router;
