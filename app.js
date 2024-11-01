@@ -85,7 +85,7 @@ app.use((req, res, next) => {
 // app.get("/api/v1/tours/:id", getTour);
 // app.patch("/api/v1/tours/:id", updateTour);
 // app.delete("/api/v1/tours/:id", deleteTour);
-//////////////////////////////
+/////////////////////////////
 
 // MIDDLEWARE FOR TOUR AND USER ROUTES
 
