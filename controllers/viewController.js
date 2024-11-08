@@ -5,7 +5,7 @@ exports.getOverview = catchAsync(async (req, res, next) => {
   // 1) Get all tours
   const tours = await Tour.find();
 
-  // 2) Build template
+  // 2) Build template (overview.pug)
   // 3) Render the tours data from step 1
 
   res.status(200).render("overview", {
@@ -20,8 +20,11 @@ exports.getTour = catchAsync(async (req, res, next) => {
     path: "reviews",
     field: "user rating review",
   });
+
+  console.log(`=== Single Tour: ${JSON.stringify(tour)} ========`)
+
   // .populate("guides");
-  // 2) Build template
+  // 2) Build template (tour.pug)
   // 3) Render template using data from 1)
 
   res.status(200).render("tour", {
