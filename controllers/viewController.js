@@ -21,16 +21,17 @@ exports.getTour = catchAsync(async (req, res, next) => {
     field: "user rating review",
   });
 
-  console.log(`=== Single Tour: ${JSON.stringify(tour)} ========`)
-
   // .populate("guides");
   // 2) Build template (tour.pug)
   // 3) Render template using data from 1)
 
-  res.status(200).render("tour", {
-    title: `${tour.name}`,
-    tour,
-  });
+  res
+    .status(200)
+    .set("Content-Security-Policy", "frame-src 'self'")
+    .render("tour", {
+      title: `${tour.name} Tour`,
+      tour,
+    });
 });
 
 /////
