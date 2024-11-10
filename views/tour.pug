@@ -1,6 +1,14 @@
 extends base
 include _reviewCard
 
+block append head
+    script(src='/js/mapbox.js' defer)
+    script(src="https://js.api.here.com/v3/3.1/mapsjs-core.js", crossorigin)
+    script(src="https://js.api.here.com/v3/3.1/mapsjs-service.js", crossorigin)
+    script(src="https://js.api.here.com/v3/3.1/mapsjs-ui.js", crossorigin)
+    script(src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js", crossorigin)
+    link(rel="stylesheet" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css", crossorigin)
+
 mixin overviewBox(icon, label, text)
     .overview-box__detail
         svg.overview-box__icon
@@ -65,7 +73,8 @@ block content
                 img.picture-box__img(src=`/img/tours/${img}`, alt=`${tour.name} ${i + 1}`, class = `picture-box__img--${i + 1}`)
 
     section.section-map
-        #map
+        #map(data-locations= `${JSON.stringify(tour.locations)}`)
+
 
     section.section-reviews
         .reviews
