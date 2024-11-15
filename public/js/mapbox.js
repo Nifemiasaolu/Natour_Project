@@ -13,12 +13,12 @@ var defaultLayers = platform.createDefaultLayers();
 // Instantiate the map:
 var map = new H.Map(
   document.getElementById('map'),
-  // defaultLayers.vector.normal.map,
-  defaultLayers.raster.satellite.map,  // Use satellite map layer
+  defaultLayers.vector.normal.map,
+  // defaultLayers.raster.satellite.map,  // Use satellite map layer
   // defaultLayers.raster.hybrid.map, // Uses a hybrid map that combines satellite images with street and places names overhead on top. Available on subscription plan.
   {
     zoom: 10,
-    center: { lat: 37.7749, lng: -122.4194 } ,// Example: San Francisco
+    center: { lat: 37.7749, lng: -122.4194 } , //follows the lat/lng location dynamics
     tilt: 45,      // Tilt angle for 3D effect
     heading: 180   // Rotation (heading) angle in degrees
   });
@@ -28,6 +28,31 @@ var mapEvents = new H.mapevents.MapEvents(map);
 
 // Add interaction to the map
 var behavior = new H.mapevents.Behavior(mapEvents);
+behavior.disable(H.mapevents.Behavior.WHEELZOOM) // Disable scroll zoom
+// behavior.disable(H.mapevents.Behavior.DRAGGING) // Disable Dragging
+
+
+// Define bounds based on southwest and northeast coordinates
+const minLat = 34.0522; // Southwest corner latitude
+const minLng = -118.2437; // Southwest corner longitude
+const maxLat = 40.7128; // Northeast corner latitude
+const maxLng = -74.0060; // Northeast corner longitude
+
+
+const bounds = new H.geo.Rect()
+
+locations.forEach(loc => {
+  // Add marker
+  const el = document.createElement("div")
+  el.className = "marker"
+})
+
+
+
+
+
+
+
 
 // Add UI controls to the map
 var ui = H.ui.UI.createDefault(map, defaultLayers);
