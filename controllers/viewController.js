@@ -20,6 +20,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     path: "reviews",
     field: "user rating review",
   });
+  console.log("Tour: ", tour);
 
   // .populate("guides");
   // 2) Build template (tour.pug)
