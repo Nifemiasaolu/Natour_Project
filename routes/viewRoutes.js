@@ -8,4 +8,4 @@ router.get(`/tour/:slug`, viewController.getTour);
 
 module.exports = router;
 
-/////\\////
+/////\\///
