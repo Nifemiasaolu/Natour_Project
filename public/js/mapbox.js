@@ -87,3 +87,5 @@ var ui = H.ui.UI.createDefault(map, defaultLayers);
 // map.addObject(marker);
 
 console.log("HERE Map loaded successfully!");
+
+/////////
