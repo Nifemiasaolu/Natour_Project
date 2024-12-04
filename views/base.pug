@@ -4,6 +4,7 @@ html
         block head
             meta(charset='UTF-8')
             meta(name='viewport' content='width=device-width, initial-scale=1.0')
+            <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' http://127.0.0.1:8000;">
             link(rel='stylesheet' href='https://fonts.googleapis.com/css?family=Lato:300,300i,700')
             link(rel='stylesheet' href='/css/style.css')
             link(rel='shortcut icon' type='image/png' href='/img/favicon.png')
@@ -21,6 +22,7 @@ html
         // FOOTER
         include _footer
 
+        script(src='/js/login.js' defer)
 
 
 
@@ -28,66 +30,6 @@ html
 
     //- /////
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //- Buffered Code
-        //- h1= tour
-        //- h2= user.toUpperCase() => This type of code is called 'Buffered Code', cos it adds something to the output.
-
-        //- Unbuffered Code: It does not add anything to the output.
-        //- const x = 9;
-        //- h2= 2 * x
-        //- h1 The Park Camper
-        //- If you want a comment to be visible on the browser console, use //.
 
 
 

@@ -1,4 +1,5 @@
 const Tour = require("../models/tourModel");
+// const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 
 exports.getOverview = catchAsync(async (req, res, next) => {
@@ -20,7 +21,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
     path: "reviews",
     field: "user rating review",
   });
-  console.log("Tour: ", tour);
+  // console.log("Tour: ", tour);
 
   // .populate("guides");
   // 2) Build template (tour.pug)
@@ -35,4 +36,21 @@ exports.getTour = catchAsync(async (req, res, next) => {
     });
 });
 
-/////
+exports.getLoginForm = (req, res) => {
+  // const {email, password} = req.body;
+  //
+  // const existingUser = await User.findOne({ email });
+  // if(!existingUser) {
+  //
+  // }
+
+  res.status(200).render("login", {
+    title: "Log into your account",
+  });
+};
+
+exports.getSignUpForm = (req, res) => {
+  res.status(200).render("signup", {
+    title: "Sign up",
+  });
+};
